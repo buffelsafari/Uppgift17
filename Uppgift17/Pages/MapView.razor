@@ -1,9 +1,163 @@
-﻿
+﻿@inject IJSRuntime JS
 
-<canvas style="background-color: cyan; width: 100vw; height: 100vh; overflow:hidden;">
+@using Models
 
+
+<canvas @ref="canvas" @onclick="OnClick" @onmousemove="OnMouseMove" @onmousewheel="OnMouseWheel" @onmousedown="OnMouseDown" style="background-color: black; width: 100vw; height: 100vh; overflow:hidden;">
 </canvas>
 
-@code {
+@code 
+{
 
+    private MapViewMatrix matrix;
+    private ElementReference canvas;
+    //private IJSObjectReference context;
+    private List<DrawOperation> drawList = new List<DrawOperation>();
+    private double zoom = 1;
+    private double rotation = 0;
+    private double mouseDownX = 0;
+    private double mouseDownY = 0;
+
+    private double transX = 0;
+    private double transY = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        matrix = new MapViewMatrix
+        {
+            m11 = 1,
+            m12 = 0,
+            m13 = 0,
+
+            m21 = 0,
+            m22 = 1,
+            m23 = 0,
+
+            m31 = 100,
+            m32 = 0,
+            m33 = 1,
+        };
+
+
+        drawList.Add(new DrawOperation { Operation = "clear", Data = null });
+        drawList.Add(new DrawOperation { Operation = "beginPath", Data = null });
+        drawList.Add(new DrawOperation { Operation = "moveTo", Data = new int[]{0,0 } });
+        drawList.Add(new DrawOperation { Operation = "lineTo", Data = new int[] { 100, 100 } });
+        drawList.Add(new DrawOperation { Operation = "lineTo", Data = new int[] { 500, 100 } });
+        drawList.Add(new DrawOperation { Operation = "lineTo", Data = new int[] { 700, 600 } });
+        drawList.Add(new DrawOperation { Operation = "arcCW", Data = new int[] { 600, 600, 100, 0, 180 } });
+        drawList.Add(new DrawOperation { Operation = "arcCCW", Data = new int[] { 400, 600, 100, 0, 180 } });
+        drawList.Add(new DrawOperation { Operation = "strokeRGBA", Data = new int[] { 255, 255,0,128 } });
+        drawList.Add(new DrawOperation { Operation = "lineWidth", Data = new int[] { 10 } });
+        drawList.Add(new DrawOperation { Operation = "stroke", Data = null });
+
+
+        await JS.InvokeVoidAsync("AddResizeListener", DotNetObjectReference.Create(this), "OnResize", canvas);
+        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+
+        await base.OnInitializedAsync();
+    }
+
+
+
+    private async Task OnClick()
+    {
+
+        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+
+
+
+
+
+    }
+
+    private void OnMouseDown(MouseEventArgs args)
+    {
+        mouseDownX = (args.OffsetX/zoom-transX);
+        mouseDownY = (args.OffsetY/zoom-transY);
+    }
+
+    private async Task OnMouseMove(MouseEventArgs args)
+    {
+        if (args.Buttons == 1)
+        {
+            //matrix.m31 = (float)(args.ClientX-mouseDownX);
+            //matrix.m32 = (float)(args.ClientY-mouseDownY);
+
+            transX = (args.OffsetX/zoom - mouseDownX);
+            transY = (args.OffsetY/zoom - mouseDownY);
+
+            await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+        }
+
+    }
+
+    private async Task OnMouseWheel(WheelEventArgs args)
+    {
+        if (args.Buttons == 0)
+        {
+            float deltaZoom = (float)(args.DeltaY * 0.001f);
+            zoom += deltaZoom;
+
+            if (zoom < 0.25f)
+            {
+                zoom = 0.25f;
+            }
+            if (zoom > 2.0f)
+            {
+                zoom = 2.0f;
+            }
+
+            matrix.m11 = (float)(1.0 * zoom);
+            //matrix.m22 = (float)(1.0 * zoom);
+
+
+
+        }
+
+
+        if (args.Buttons == 4)
+        {
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+
+        Console.WriteLine("the buttons in the mouse wheeler"+args.Buttons);
+    }
+
+
+
+
+    [JSInvokable]
+    public async Task Redraw()
+    {
+        Console.WriteLine("hello from redraw");
+
+        float rotation = 0.0f;
+        float scale = (float)zoom;
+        //float transX = matrix.m31;
+        //float transY = matrix.m32;
+
+        await JS.InvokeVoidAsync("Draw", canvas, drawList, scale, transX, transY, rotation); //change to scale
+    }
+
+    [JSInvokable]
+    public async Task OnResize()
+    {
+        Console.WriteLine("hello resize");
+        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+    }
 }
