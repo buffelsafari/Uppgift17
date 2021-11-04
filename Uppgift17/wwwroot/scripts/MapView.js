@@ -21,44 +21,45 @@ function RequestAnimationFrame(instance, method, canvas)
 }
 
 
-function createTransform(originX, originY, scale, rotate, context)
-{
-    const xAxisX = Math.cos(rotate) * scale;
-    const xAxisY = Math.sin(rotate) * scale;
-    context.setTransform(xAxisX, xAxisY, -xAxisY, xAxisX, originX, originY);
-}
+//function createTransform(originX, originY, scale, rotate, context)
+//{
+//    const xAxisX = Math.cos(rotate) * scale;
+//    const xAxisY = Math.sin(rotate) * scale;
+//    context.setTransform(xAxisX, xAxisY, -xAxisY, xAxisX, originX, originY);
+//}
 
-function Draw(canvas, list, scale, transX, transY, rotation)
+
+function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, instance ,clickEvent)
 {
-    //console.log(list);
+
+
+    
+
+
     let context = canvas.getContext("2d");
-    //console.log("matrix----");
-    //console.log(matrix);
-
-    //context.translate(1000, 1000);
-    //context.scale(0.5, 0.5);
-    //context.translate(-1000,-1000);
-    //context.setTransform(matrix.m11, matrix.m12, matrix.m21, matrix.m22, matrix.m31, matrix.m32);
-
+    
     let offsetX = canvas.width/2;
-    let offsetY = canvas.height/2;
+    let offsetY = canvas.height/2;    
 
+    MapView.CreateTransform(offsetX, offsetY, scale, 0, context);
     
-
-    //context.translate(-offsetX, -offsetY);
-
-    //context.rotate(0.78);
-
-
-    createTransform(offsetX, offsetY, scale, rotation, context);
-
-    //context.setTransform(1, 0, 0, 1, 0, 0);
     context.translate(transX, transY);
+
+    //let clickPointX=0;
+    //let clickPointY=0;
+
+    //if (isClicked)
+    //{
+    //    //clickPointX = px - offsetX / scale;  //correct in other ways
+    //    //clickPointY = py - offsetY / scale;
+    //    console.log("clicked----------------------------------");
+    //    clickPointX = px;
+    //    clickPointY = py;
+    //}
+    
+
     
     
-    //context.rotate(0.1);
-    //context.scale(1.1, 1.1);
-    //context.transform(1, 0, 0, 1, offsetX, offsetY);
     
 
     list.forEach(item =>
@@ -74,6 +75,9 @@ function Draw(canvas, list, scale, transX, transY, rotation)
                 break;
             case "beginPath":                
                 context.beginPath();
+                break;
+            case "closePath":
+                context.closePath();
                 break;
             case "moveTo":                
                 context.moveTo(item.data[0],item.data[1]);
@@ -98,6 +102,22 @@ function Draw(canvas, list, scale, transX, transY, rotation)
             case "arcCCW":                
                 context.arc(item.data[0], item.data[1], item.data[2], item.data[3] * Math.PI / 180, item.data[4] * Math.PI / 180, true);
                 break;
+            case "testClick":
+                if (isClicked & context.isPointInPath(px, py))
+                {                    
+                    instance.invokeMethodAsync(clickEvent, item.targetId);
+                }
+                break;
+            case "save":
+                context.save();
+                break;
+            case "restore":
+                context.restore();
+                break;
+            case "rotate":
+                console.log("MAX ROTATION--------------------------------------------------------------------------------------------------");
+                context.rotate((item.data[0] * Math.PI)/180);
+                break;
             
 
         }
@@ -108,16 +128,30 @@ function Draw(canvas, list, scale, transX, transY, rotation)
 
     
 
-    context.beginPath();
-    context.rect(20, 20, 150, 100);
+
+    //createTransform(-100, -100, 1, rotation, context);
+
+    //console.log("clickX:" + px);
+    //console.log("clickY:" + py);
+    context.save();
+    context.rotate(1);
+    context.translate(-300, -300);
+    context.beginPath();    
+    context.rect(-100, -100, 100, 100);    
     context.fillStyle = "red";
     context.fill();
+    if (isClicked & context.isPointInPath(px, py))
+    {
+        instance.invokeMethodAsync(clickEvent, item.targetId);
+    }
     context.stroke();
-   
+    
+
     context.font = "30px Arial";
+    context.fillStyle = "blue";
     context.fillText("Hello World", 800, 50);
 
-
+context.restore();
     
 
     
@@ -141,6 +175,13 @@ class MapView
     static Clear(canvas, context)
     {
         context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    static CreateTransform(originX, originY, scale, rotate, context)
+    {
+        const xAxisX = Math.cos(rotate) * scale;
+        const xAxisY = Math.sin(rotate) * scale;
+        context.setTransform(xAxisX, xAxisY, -xAxisY, xAxisX, originX, originY);
     }
 
     
