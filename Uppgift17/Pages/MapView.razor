@@ -11,9 +11,10 @@
 @code 
 {
     [CascadingParameter]
-    protected IEnumerable<DrawOperation> DrawOps { get; set; }
+    protected Task<IEnumerable<DrawOperation>> DrawOps { get; set; }
 
-    
+    [Parameter]
+    public Action<string> OnMachineClick { get; set; }
 
     private ElementReference canvas;
     private List<DrawOperation> drawList = new List<DrawOperation>();
@@ -33,62 +34,19 @@
     //private Entity baseEntity;
 
 
+    protected async override Task OnParametersSetAsync()
+    {
+        Console.WriteLine("parameters set---------------------------------------------------");
+        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+        base.OnParametersSet();
+    }
 
 
     protected override async Task OnInitializedAsync()
     {
-        //baseEntity = new Entity();
-
-        //baseEntity.AddOperation(new DrawOperation { Operation = "clear", Data = null });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "beginPath", Data = null });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "moveTo", Data = new int[] { 0, 0 } });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 100, 100 } });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 500, 100 } });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 700, 600 } });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "arcCW", Data = new int[] { 600, 600, 100, 0, 180 } });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "arcCCW", Data = new int[] { 400, 600, 100, 0, 180 } });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "testClick", TargetId = Guid.NewGuid().ToString("n"), Data = null });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "strokeRGBA", Data = new int[] { 255, 255, 0, 128 } });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "lineWidth", Data = new int[] { 10 } });
-        //baseEntity.AddOperation(new DrawOperation { Operation = "stroke", Data = null });
-
-
-        //Entity child = new Entity();
-        ////child.AddOperation(new DrawOperation { Operation = "clear", Data = null });
-        //child.AddOperation(new DrawOperation { Operation = "beginPath", Data = null });
-        //child.AddOperation(new DrawOperation { Operation = "moveTo", Data = new int[] { 500, 500 } });
-        //child.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 600, 500 } });
-        //child.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 600, 600 } });
-        //child.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 500, 600 } });
-
-        //child.AddOperation(new DrawOperation { Operation = "testClick", TargetId = Guid.NewGuid().ToString("n"), Data = null });
-        //child.AddOperation(new DrawOperation { Operation = "closePath", Data = null });
-        //child.AddOperation(new DrawOperation { Operation = "strokeRGBA", Data = new int[] { 255, 255, 0, 128 } });
-        //child.AddOperation(new DrawOperation { Operation = "lineWidth", Data = new int[] { 10 } });
-        //child.AddOperation(new DrawOperation { Operation = "stroke", Data = null });
-
-        //baseEntity.AddChild(child);
-
-
-
-
-
-        //drawList.Add(new DrawOperation { Operation = "clear", Data = null });
-        //drawList.Add(new DrawOperation { Operation = "beginPath", Data = null });
-        //drawList.Add(new DrawOperation { Operation = "moveTo", Data = new int[]{0,0 } });
-        //drawList.Add(new DrawOperation { Operation = "lineTo", Data = new int[] { 100, 100 } });
-        //drawList.Add(new DrawOperation { Operation = "lineTo", Data = new int[] { 500, 100 } });
-        //drawList.Add(new DrawOperation { Operation = "lineTo", Data = new int[] { 700, 600 } });
-        //drawList.Add(new DrawOperation { Operation = "arcCW", Data = new int[] { 600, 600, 100, 0, 180 } });
-        //drawList.Add(new DrawOperation { Operation = "arcCCW", Data = new int[] { 400, 600, 100, 0, 180 } });
-        //drawList.Add(new DrawOperation { Operation = "testClick", TargetId=Guid.NewGuid().ToString("n"), Data = null });
-        //drawList.Add(new DrawOperation { Operation = "strokeRGBA", Data = new int[] { 255, 255,0,128 } });
-        //drawList.Add(new DrawOperation { Operation = "lineWidth", Data = new int[] { 10 } });
-        //drawList.Add(new DrawOperation { Operation = "stroke", Data = null });
-
 
         await JS.InvokeVoidAsync("AddResizeListener", DotNetObjectReference.Create(this), "OnResize", canvas);
-        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+        //await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
 
         await base.OnInitializedAsync();
     }
@@ -174,7 +132,7 @@
 
 
 
-        await JS.InvokeVoidAsync("Draw", canvas, DrawOps, zoom, transX, transY, rotation, clickX, clickY, isClicked, DotNetObjectReference.Create(this), "OnMapClick");
+        await JS.InvokeVoidAsync("Draw", canvas, await DrawOps, zoom, transX, transY, rotation, clickX, clickY, isClicked, DotNetObjectReference.Create(this), "OnMapClick");
         isClicked = false;
     }
 
@@ -189,6 +147,8 @@
     public async Task OnMapClick(string id)
     {
         Console.WriteLine("hello from OnMapClick:"+id);
+
+        OnMachineClick.Invoke("Hello from ChildComponent id:"+id);
         //await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
     }
 }

@@ -33,7 +33,7 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
 {
 
 
-    
+    let currentRotation = 0;
 
 
     let context = canvas.getContext("2d");
@@ -94,6 +94,9 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
             case "strokeRGBA":                
                 context.strokeStyle = "rgba(" + item.data[0] + "," + item.data[1] + "," + item.data[2] + "," + (item.data[3]/255)+")";
                 break;
+            case "fillRGBA":
+                context.fillStyle = "rgba(" + item.data[0] + "," + item.data[1] + "," + item.data[2] + "," + (item.data[3] / 255) + ")";
+                break;
             case "lineWidth":                
                 context.lineWidth = item.data[0];
             case "arcCW":                
@@ -115,8 +118,20 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
                 context.restore();
                 break;
             case "rotate":
-                console.log("MAX ROTATION--------------------------------------------------------------------------------------------------");
+                currentRotation += item.data[0];
                 context.rotate((item.data[0] * Math.PI)/180);
+                break;
+            case "translate":
+                console.log("translate-------------------------------------------------------------------------");
+                context.translate(item.data[0], item.data[1]);
+                break;
+            case "levelText":
+                context.save();
+                context.rotate((-currentRotation * Math.PI) / 180);
+                context.font = "50px Arial";
+                context.fillStyle = "white";
+                context.fillText(item.targetId, 0, 0);
+                context.restore();
                 break;
             
 

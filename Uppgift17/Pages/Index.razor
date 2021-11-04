@@ -2,56 +2,53 @@
 @using ViewEntity
 @using Models
 @inject HttpClient Http
+@inject IEntityResourceManager entityResourceManager
 
-<CascadingValue Value="@baseEntity.GetDrawOperations()">
+<CascadingValue Value=DrawOps>
 
-    <MapView />
-    
+    <MapView OnMachineClick=OnMachineClick/>
+
 </CascadingValue>
+
+
+
+<button @onclick="OnClick" style="position:absolute; top:50px; left:200px;">click me to update!</button>
 
 @code
 {
 
+    [CascadingParameter]
+    public Task<IEnumerable<DrawOperation>> DrawOps { get; set; }
 
     protected Entity baseEntity;
 
 
+    void OnMachineClick(string id)
+    {
+        Console.WriteLine("hello from index "+id);
+    }
+
+
     protected async override Task OnInitializedAsync()
     {
+        //EntityResourceManager entityResourceManager = new EntityResourceManager(Http);
+        //entityResourceManager.Load();
 
 
 
-        baseEntity = new Entity(45);
-
-        baseEntity.AddOperation(new DrawOperation { Operation = "clear", Data = null });
-        baseEntity.AddOperation(new DrawOperation { Operation = "beginPath", Data = null });
-        baseEntity.AddOperation(new DrawOperation { Operation = "moveTo", Data = new int[] { 0, 0 } });
-        baseEntity.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 100, 100 } });
-        baseEntity.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 500, 100 } });
-        baseEntity.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 700, 600 } });
-        baseEntity.AddOperation(new DrawOperation { Operation = "arcCW", Data = new int[] { 600, 600, 100, 0, 180 } });
-        baseEntity.AddOperation(new DrawOperation { Operation = "arcCCW", Data = new int[] { 400, 600, 100, 0, 180 } });
-        baseEntity.AddOperation(new DrawOperation { Operation = "testClick", TargetId = Guid.NewGuid().ToString("n"), Data = null });
-        baseEntity.AddOperation(new DrawOperation { Operation = "strokeRGBA", Data = new int[] { 255, 255, 0, 128 } });
-        baseEntity.AddOperation(new DrawOperation { Operation = "lineWidth", Data = new int[] { 10 } });
-        baseEntity.AddOperation(new DrawOperation { Operation = "stroke", Data = null });
+        baseEntity = new Entity(entityResourceManager, "factory_walls", 45,100,0);
 
 
-        Entity child = new Entity(0);
-        //child.AddOperation(new DrawOperation { Operation = "clear", Data = null });
-        child.AddOperation(new DrawOperation { Operation = "beginPath", Data = null });
-        child.AddOperation(new DrawOperation { Operation = "moveTo", Data = new int[] { 500, 500 } });
-        child.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 600, 500 } });
-        child.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 600, 600 } });
-        child.AddOperation(new DrawOperation { Operation = "lineTo", Data = new int[] { 500, 600 } });
 
-        child.AddOperation(new DrawOperation { Operation = "testClick", TargetId = Guid.NewGuid().ToString("n"), Data = null });
-        child.AddOperation(new DrawOperation { Operation = "closePath", Data = null });
-        child.AddOperation(new DrawOperation { Operation = "strokeRGBA", Data = new int[] { 255, 255, 0, 128 } });
-        child.AddOperation(new DrawOperation { Operation = "lineWidth", Data = new int[] { 10 } });
-        child.AddOperation(new DrawOperation { Operation = "stroke", Data = null });
+
+
+
+        Entity child = new Entity(entityResourceManager, "factory_walls2", 0,100,100);
+
         baseEntity.AddChild(child);
 
+
+        DrawOps = baseEntity.GetDrawOperations();
 
         base.OnInitialized();
     }
@@ -59,10 +56,23 @@
 
     protected async override Task OnParametersSetAsync()
     {
-        baseEntity.AddChild(await ServerLoader.Load(Http));
+        //baseEntity.AddChild(await ServerLoader.Load(Http, entityResourceManager));
+
+        //await entityResourceManager.Load("factory_walls");
+
+        //baseEntity.LoadResources(entityResourceManager);
+
 
 
         base.OnParametersSet();
+    }
+
+    private void OnClick()
+    {
+        DrawOps = baseEntity.GetDrawOperations();
+
+        Console.WriteLine("hello from click");
+        StateHasChanged();
     }
 
 }

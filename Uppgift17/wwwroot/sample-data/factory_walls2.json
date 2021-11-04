@@ -9,33 +9,24 @@
         {
             "TargetId": "",
             "Operation": "moveTo",
-            "Data": [ -1500, -1000 ]
+            "Data": [ -1400, -900 ]
         },
         {
             "TargetId": "",
             "Operation": "lineTo",
-            "Data": [ 1500, -1000 ]
+            "Data": [ 1400, -900 ]
         },
         {
             "TargetId": "",
             "Operation": "lineTo",
-            "Data": [ 1500, 1000 ]
+            "Data": [ 1400, 900 ]
         },
         {
             "TargetId": "",
             "Operation": "lineTo",
-            "Data": [ -1500, 1000 ]
-        },
-        {
-            "TargetId": "",
-            "Operation": "closePath",
-            "Data": []
-        },
-        {
-            "TargetId": "Hello cruel world",
-            "Operation": "levelText",
-            "Data": []
+            "Data": [ -1400, 900 ]
         }
+        
     ]
 }
 
