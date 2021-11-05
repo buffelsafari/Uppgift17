@@ -4,15 +4,18 @@
 @inject HttpClient Http
 @inject IEntityResourceManager entityResourceManager
 
+<div style="user-select: none;">
 <CascadingValue Value=DrawOps>
 
-    <MapView OnMachineClick=OnMachineClick/>
+    <MapView OnMachineClick=OnMachineClick OnMachineDown="OnMachineDown"/>
 
 </CascadingValue>
 
 
 
 <button @onclick="OnClick" style="position:absolute; top:50px; left:200px;">click me to update!</button>
+
+</div>
 
 @code
 {
@@ -28,24 +31,34 @@
         Console.WriteLine("hello from index "+id);
     }
 
+    void OnMachineDown(string id)
+    {
+        Console.WriteLine("hello from index " + id);
+    }
+
 
     protected async override Task OnInitializedAsync()
     {
-        //EntityResourceManager entityResourceManager = new EntityResourceManager(Http);
-        //entityResourceManager.Load();
-
-
 
         baseEntity = new Entity(entityResourceManager, "factory_walls", 45,100,0);
 
 
 
-
-
-
         Entity child = new Entity(entityResourceManager, "factory_walls2", 0,100,100);
-
         baseEntity.AddChild(child);
+
+
+        Entity machine1 = new Entity(entityResourceManager, "square_machine", 0, 600, 600);
+        baseEntity.AddChild(machine1);
+
+        Entity machine2 = new Entity(entityResourceManager, "triangle_machine", 0, -600, -600);
+        baseEntity.AddChild(machine2);
+
+        Entity machine3 = new Entity(entityResourceManager, "circle_machine", 0, -600, 600);
+        baseEntity.AddChild(machine3);
+
+        Entity machine4 = new Entity(entityResourceManager, "star_machine", 0, 200, 200);
+        baseEntity.AddChild(machine4);
 
 
         DrawOps = baseEntity.GetDrawOperations();

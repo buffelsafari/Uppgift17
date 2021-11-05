@@ -29,7 +29,7 @@ function RequestAnimationFrame(instance, method, canvas)
 //}
 
 
-function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, instance ,clickEvent)
+function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, isMoving, instance, clickEvent, downEvent)
 {
 
 
@@ -42,8 +42,15 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
     let offsetY = canvas.height/2;    
 
     MapView.CreateTransform(offsetX, offsetY, scale, 0, context);
+
     
     context.translate(transX, transY);
+
+
+
+
+    context.rotate(rotation);
+    currentRotation += rotation;
 
     //let clickPointX=0;
     //let clickPointY=0;
@@ -105,11 +112,16 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
             case "arcCCW":                
                 context.arc(item.data[0], item.data[1], item.data[2], item.data[3] * Math.PI / 180, item.data[4] * Math.PI / 180, true);
                 break;
-            case "testClick":
+            case "testClick":                
                 if (isClicked & context.isPointInPath(px, py))
-                {                    
+                {
                     instance.invokeMethodAsync(clickEvent, item.targetId);
                 }
+                else if (context.isPointInPath(px, py))
+                {
+                    instance.invokeMethodAsync(downEvent, item.targetId);
+                }
+                
                 break;
             case "save":
                 context.save();
@@ -121,8 +133,7 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
                 currentRotation += item.data[0];
                 context.rotate((item.data[0] * Math.PI)/180);
                 break;
-            case "translate":
-                console.log("translate-------------------------------------------------------------------------");
+            case "translate":                
                 context.translate(item.data[0], item.data[1]);
                 break;
             case "levelText":
@@ -166,7 +177,7 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
     context.fillStyle = "blue";
     context.fillText("Hello World", 800, 50);
 
-context.restore();
+    context.restore();
     
 
     
@@ -189,7 +200,10 @@ class MapView
 {
     static Clear(canvas, context)
     {
+        context.save();
+        context.setTransform(1, 0, 0, 1, 0, 0);
         context.clearRect(0, 0, canvas.width, canvas.height);
+        context.restore();
     }
 
     static CreateTransform(originX, originY, scale, rotate, context)

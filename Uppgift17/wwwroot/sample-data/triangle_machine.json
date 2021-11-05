@@ -3,44 +3,30 @@
     "operations": [
         {
             "TargetId": "",
-            "Operation": "clear",
-            "Data": []
-        },
-        {
-            "TargetId": "",
             "Operation": "beginPath",
             "Data": []
         },
         {
             "TargetId": "",
             "Operation": "moveTo",
-            "Data": [ -1500, -1000 ]
+            "Data": [ 0, -87 ]
         },
         {
             "TargetId": "",
             "Operation": "lineTo",
-            "Data": [ 1500, -1000 ]
+            "Data": [ 100, 87 ]
         },
         {
             "TargetId": "",
             "Operation": "lineTo",
-            "Data": [ 1500, 1000 ]
-        },
-        {
-            "TargetId": "",
-            "Operation": "lineTo",
-            "Data": [ -1500, 1000 ]
-        },
+            "Data": [ -100, 87 ]
+        },        
         {
             "TargetId": "",
             "Operation": "closePath",
             "Data": []
-        },
-        {
-            "TargetId": "Hello cruel world",
-            "Operation": "levelText",
-            "Data": []
         }
+
     ]
 }
 

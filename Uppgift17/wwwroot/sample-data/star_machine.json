@@ -1,0 +1,77 @@
+{
+
+    "operations": [
+        {
+            "TargetId": "",
+            "Operation": "beginPath",
+            "Data": []
+        },
+        {
+            "TargetId": "",
+            "Operation": "moveTo",
+            "Data": [ 0, -100 ]
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ 25, -43 ] 
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ 87, -50 ]
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ 50, 0 ] 
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ 87, 50 ]
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ 25, 43 ] 
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ 0, 100 ]
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ -25, 43 ] 
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ -87, 50 ]
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ -50, 0 ] 
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ -87, -50 ]
+        },
+        {
+            "TargetId": "",
+            "Operation": "lineTo",
+            "Data": [ -25, -43 ]
+        },
+        {
+            "TargetId": "",
+            "Operation": "closePath",
+            "Data": []
+        }
+
+    ]
+}
+

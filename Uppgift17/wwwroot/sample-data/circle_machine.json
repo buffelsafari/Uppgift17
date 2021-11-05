@@ -1,0 +1,22 @@
+{
+
+    "operations": [
+        {
+            "TargetId": "",
+            "Operation": "beginPath",
+            "Data": []
+        },        
+        {
+            "TargetId": "",
+            "Operation": "arcCW",
+            "Data": [ 0, 0, 100, 0, 360 ]
+        },       
+        {
+            "TargetId": "",
+            "Operation": "closePath",
+            "Data": []
+        }
+
+    ]
+}
+

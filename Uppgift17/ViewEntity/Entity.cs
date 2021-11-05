@@ -41,11 +41,13 @@ namespace Uppgift17.ViewEntity
 
             fillColor = new DrawOperation{ Operation = "fillRGBA", Data = new int[] { 0, 255, 0, 255 } };
 
-            operationEndList.Add(new DrawOperation { Operation = "lineWidth", Data = new int[] { 2 } });
+            operationEndList.Add(new DrawOperation { Operation = "lineWidth", Data = new int[] { 8 } });
             operationEndList.Add(new DrawOperation { Operation = "strokeRGBA", Data = new int[] {255,255,0,255 } });
             operationEndList.Add(fillColor);
             operationEndList.Add(new DrawOperation { Operation = "testClick", TargetId="fake_id", Data = null });
-            operationEndList.Add(new DrawOperation { Operation = "fill", Data = null });
+            
+            
+            //operationEndList.Add(new DrawOperation { Operation = "fill", Data = null });
             operationEndList.Add(new DrawOperation { Operation = "stroke", Data = null});
             
 

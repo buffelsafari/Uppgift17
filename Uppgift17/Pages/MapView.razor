@@ -2,9 +2,10 @@
 
 @using Models
 @using ViewEntity
+@using MapViewFSM
 
 
-<canvas @ref="canvas" @onclick="OnClick" @onmousemove="OnMouseMove" @onmousewheel="OnMouseWheel" @onmousedown="OnMouseDown" style="background-color: black; width: 100vw; height: 100vh; overflow:hidden;">
+<canvas @ref="canvas" @onclick="OnClick" @onmousemove="OnMouseMove" @onmousewheel="OnMouseWheel" @onmousedown="OnMouseDown" @onmouseup="OnMouseUp" style="background-color: black; width: 100vw; height: 100vh; overflow:hidden;">
 </canvas>
 
 <button class="btn btn-danger" style="position:absolute; left:0; top:0;">hello</button>
@@ -16,111 +17,75 @@
     [Parameter]
     public Action<string> OnMachineClick { get; set; }
 
+    [Parameter]
+    public Action<string> OnMachineDown { get; set; }
+
+
+
+    public double Zoom { get; set; } = 1;
+
+
+
+
+
+    public double Rotation { get; set; } = 0;
+    public double TransX { get; set; } = 0;
+    public double TransY { get; set; } = 0;
+
+
+    public double ClickX { get; set; } = 0;
+    public double ClickY { get; set; } = 0;
+    public bool IsClicked { get; set; } = false;
+    public bool IsMoving { get; set; } = false;
+
+
+
+
+
+
     private ElementReference canvas;
-    private List<DrawOperation> drawList = new List<DrawOperation>();
-    private double zoom = 1;
-    private double rotation = 0;
-    private double mouseDownX = 0;
-    private double mouseDownY = 0;
+    public Func<MouseEventArgs, Task> OnClick;
+    public Func<MouseEventArgs, Task> OnMouseDown;
+    public Func<MouseEventArgs, Task> OnMouseUp;
+    public Func<MouseEventArgs, Task> OnMouseMove;
 
-    private double transX = 0;
-    private double transY = 0;
+    public Func<WheelEventArgs, Task> OnMouseWheel;
 
-    private bool isClicked = false;
-    private double clickX=0;
-    private double clickY=0;
-    private bool isMoving = false;
 
-    //private Entity baseEntity;
+
+
+    IMapViewState currentState;
+
+
+
+
+
+
+
+
 
 
     protected async override Task OnParametersSetAsync()
     {
-        Console.WriteLine("parameters set---------------------------------------------------");
+        //await currentState.OnParametersSetAsync();
         await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
         base.OnParametersSet();
     }
 
 
+
     protected override async Task OnInitializedAsync()
     {
+        currentState = new NormalState();
+        currentState.EnterState(this, JS, canvas);
 
         await JS.InvokeVoidAsync("AddResizeListener", DotNetObjectReference.Create(this), "OnResize", canvas);
-        //await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
-
         await base.OnInitializedAsync();
     }
 
 
 
-    private async Task OnClick(MouseEventArgs args)
-    {
-        Console.WriteLine(DrawOps);
 
-        //Console.WriteLine("clicked on X:" + (mouseDownX));
-        //Console.WriteLine("clicked on X:" + (mouseDownY));
-
-        isClicked = true;
-        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
-
-
-
-
-
-    }
-
-    private void OnMouseDown(MouseEventArgs args)
-    {
-        mouseDownX = (args.OffsetX/zoom-transX);
-        mouseDownY = (args.OffsetY/zoom-transY);
-
-        clickX = args.OffsetX;
-        clickY = args.OffsetY;
-
-        isMoving = true;
-
-    }
-
-
-    private async Task OnMouseMove(MouseEventArgs args)
-    {
-        if (isMoving & args.Buttons == 1)
-        {
-
-            transX = (args.OffsetX / zoom - mouseDownX);
-            transY = (args.OffsetY / zoom - mouseDownY);
-
-            await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
-        }
-        else
-        {
-            isMoving = false;
-        }
-
-    }
-
-    private async Task OnMouseWheel(WheelEventArgs args)
-    {
-
-        float deltaZoom = (float)(args.DeltaY * 0.0001f);
-        zoom += deltaZoom;
-
-        if (zoom < 0.25f)
-        {
-            zoom = 0.25f;
-        }
-        if (zoom > 2.0f)
-        {
-            zoom = 2.0f;
-        }
-
-
-
-
-        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
-
-        Console.WriteLine("the buttons in the mouse wheeler"+args.Buttons);
-    }
 
 
 
@@ -132,8 +97,8 @@
 
 
 
-        await JS.InvokeVoidAsync("Draw", canvas, await DrawOps, zoom, transX, transY, rotation, clickX, clickY, isClicked, DotNetObjectReference.Create(this), "OnMapClick");
-        isClicked = false;
+        await JS.InvokeVoidAsync("Draw", canvas, await DrawOps, Zoom, TransX, TransY, Rotation, ClickX, ClickY, IsClicked, IsMoving, DotNetObjectReference.Create(this), "OnMapClick", "OnMapDown");
+        IsClicked = false;
     }
 
     [JSInvokable]
@@ -149,6 +114,16 @@
         Console.WriteLine("hello from OnMapClick:"+id);
 
         OnMachineClick.Invoke("Hello from ChildComponent id:"+id);
+        //await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+    }
+
+    [JSInvokable]
+    public async Task OnMapDown(string id)
+    {
+        Console.WriteLine("hello from OnMapDown:" + id);
+        //isMachineGrabbed = true;
+
+        OnMachineDown.Invoke("Hello from ChildComponent id:" + id);
         //await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
     }
 }
