@@ -54,7 +54,7 @@
 
 
 
-    
+
 
 
 
@@ -74,10 +74,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        BaseState.InitFSM(ZoomState.GetInstance(), this, JS, canvas);
+        BaseState.InitFSM(IdleState.GetInstance(), this, JS, canvas, new StateChangeArgs{ X=0, Y=0 });
 
         //BaseState.ChangeState(RotateState.GetInstance());
-        
+
 
         await JS.InvokeVoidAsync("AddResizeListener", DotNetObjectReference.Create(this), "OnResize", canvas);
         await base.OnInitializedAsync();

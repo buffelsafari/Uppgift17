@@ -1,53 +1,48 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+﻿using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Uppgift17.Pages;
 
 namespace Uppgift17.MapViewFSM
 {
-    public class ZoomState :BaseState
+    public class IdleState : BaseState
     {
-        //MapView mapView;
-        //IJSRuntime JS;
-        //ElementReference canvas;       
-
         const double MIN_ZOOM = 0.25;
         const double MAX_ZOOM = 2.0;
         const double ZOOM_SPEED = 0.0005;
 
-        private static ZoomState Instance;
 
-        private ZoomState()
-        { 
-        
+        private static IdleState Instance;
+        private IdleState()
+        {
+
         }
 
-        public static ZoomState GetInstance()
+        public static IdleState GetInstance()
         {
-            if (ZoomState.Instance == null)
+            if (IdleState.Instance == null)
             {
-                Instance = new ZoomState();
+                Instance = new IdleState();
             }
             return Instance;
+
         }
 
 
-
-        protected override void EnterState()
+        protected override void EnterState(StateChangeArgs args)
         {
             mapView.OnMouseWheel = this.OnMouseWheel;
             mapView.OnMouseDown = this.OnMouseDown;
         }
 
-        protected override void LeaveState()
+        protected override void LeaveState(StateChangeArgs args)
         {
             mapView.OnMouseWheel = null;
-            mapView.OnMouseDown = null;
         }
+
+
 
         private async Task OnMouseWheel(WheelEventArgs args)
         {
@@ -64,24 +59,28 @@ namespace Uppgift17.MapViewFSM
             }
 
 
-            
-
             mapView.IsMoving = false;
-           
+
 
             await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(mapView), "Redraw", canvas);
 
             Console.WriteLine("the buttons in the mouse wheeler" + args.Buttons);
         }
 
+
         private async Task OnMouseDown(MouseEventArgs args)
         {
             if (args.Buttons == 4)
             {
-                ChangeState(RotateState.GetInstance());
-            }             
-        }
+                ChangeState(RotateState.GetInstance(), new StateChangeArgs { X = 0, Y = 0 });
+                return;
+            }
+            if (args.Buttons == 1)
+            {
 
-        
+                ChangeState(TranslateState.GetInstance(), new StateChangeArgs { X = args.OffsetX, Y = args.OffsetY });
+                return;
+            }
+        }
     }
 }

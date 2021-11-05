@@ -37,14 +37,14 @@ namespace Uppgift17.MapViewFSM
 
 
 
-        protected override void EnterState()
+        protected override void EnterState(StateChangeArgs args)
         {
 
             mapView.OnMouseWheel = this.OnMouseWheel;
             mapView.OnMouseUp = this.OnMouseUp;
         }
 
-        protected override void LeaveState()
+        protected override void LeaveState(StateChangeArgs args)
         {
             mapView.OnMouseWheel = null;
             mapView.OnMouseUp = null;
@@ -74,7 +74,7 @@ namespace Uppgift17.MapViewFSM
 
         private async Task OnMouseUp(MouseEventArgs args)
         {
-            ChangeState(ZoomState.GetInstance());
+            ChangeState(IdleState.GetInstance(),new StateChangeArgs { X=0,Y=0});
         }
 
     }
