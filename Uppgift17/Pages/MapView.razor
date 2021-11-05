@@ -54,9 +54,7 @@
 
 
 
-    IMapViewState currentState;
-
-
+    
 
 
 
@@ -76,8 +74,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        currentState = new NormalState();
-        currentState.EnterState(this, JS, canvas);
+        BaseState.InitFSM(ZoomState.GetInstance(), this, JS, canvas);
+
+        //BaseState.ChangeState(RotateState.GetInstance());
+        
 
         await JS.InvokeVoidAsync("AddResizeListener", DotNetObjectReference.Create(this), "OnResize", canvas);
         await base.OnInitializedAsync();
