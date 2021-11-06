@@ -35,6 +35,11 @@ namespace Uppgift17.MapViewFSM
             BaseState.currentState.EnterState(args);
         }
 
+        protected async Task RequestRedraw(bool test)
+        {
+            await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(mapView), "Redraw", test);
+        }
+
                 
         
     }
@@ -42,7 +47,9 @@ namespace Uppgift17.MapViewFSM
     public class StateChangeArgs
     {
         public double X { get; set; }
-        public double Y { get; set; }
+        public double Y { get; set; }        
+        public string TargetId { get; set; }
+        public double Angle { get; set; }
 
     }
 }

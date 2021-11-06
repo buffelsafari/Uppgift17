@@ -7,13 +7,15 @@
 <div style="user-select: none;">
 <CascadingValue Value=DrawOps>
 
-    <MapView OnMachineClick=OnMachineClick OnMachineDown="OnMachineDown"/>
+    <MapView OnStopTranslateEntity=OnStopTranslateEntity OnTranslateEntity=OnTranslateEntity OnMachineClick=OnMachineClick OnMachineDown=OnMachineDown/>
 
 </CascadingValue>
 
 
 
 <button @onclick="OnClick" style="position:absolute; top:50px; left:200px;">click me to update!</button>
+
+<button @onmousedown="OnAddDown" style="position:absolute; top:50px; right:200px;">add</button>
 
 </div>
 
@@ -36,9 +38,29 @@
         Console.WriteLine("hello from index " + id);
     }
 
+    void OnTranslateEntity(string id, double x, double y)
+    {
+        baseEntity.TranslateEntity(id, x, y);
+
+        Console.WriteLine("xxx Hello from on translate entity xxx id:"+id);
+        Console.WriteLine("X=" + x + "   Y=" + y);
+
+        DrawOps = baseEntity.GetDrawOperations();
+        StateHasChanged();
+    }
+
+    void OnStopTranslateEntity()
+    {
+        baseEntity.StopTranslatingEntity();
+
+        //DrawOps = baseEntity.GetDrawOperations();
+        //StateHasChanged();
+    }
+
 
     protected async override Task OnInitializedAsync()
     {
+
 
         baseEntity = new Entity(entityResourceManager, "factory_walls", 45,100,0);
 
@@ -54,7 +76,7 @@
         Entity machine2 = new Entity(entityResourceManager, "triangle_machine", 0, -600, -600);
         baseEntity.AddChild(machine2);
 
-        Entity machine3 = new Entity(entityResourceManager, "circle_machine", 0, -600, 600);
+        Entity machine3 = new Entity(entityResourceManager, "circle_machine", 30, 0, 0);
         baseEntity.AddChild(machine3);
 
         Entity machine4 = new Entity(entityResourceManager, "star_machine", 0, 200, 200);
@@ -86,6 +108,11 @@
 
         Console.WriteLine("hello from click");
         StateHasChanged();
+    }
+
+    private void OnAddDown()
+    {
+        Console.WriteLine("hello on adder");
     }
 
 }

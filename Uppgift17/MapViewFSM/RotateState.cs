@@ -67,9 +67,8 @@ namespace Uppgift17.MapViewFSM
             {
                 mapView.Rotation += Math.PI * 2;
             }               
-            
-            await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(mapView), "Redraw", canvas);
-            
+                        
+            await RequestRedraw(false);
         }
 
         private async Task OnMouseUp(MouseEventArgs args)

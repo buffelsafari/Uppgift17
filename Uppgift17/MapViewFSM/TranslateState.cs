@@ -52,8 +52,8 @@ namespace Uppgift17.MapViewFSM
             mapView.TransX = (args.OffsetX / mapView.Zoom - mouseDownX);
             mapView.TransY = (args.OffsetY / mapView.Zoom - mouseDownY);
 
-            await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(mapView), "Redraw", canvas);
-            
+            await RequestRedraw(false);
+                        
         }
 
         private async Task OnMouseUp(MouseEventArgs args)

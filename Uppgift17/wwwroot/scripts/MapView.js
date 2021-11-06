@@ -9,14 +9,11 @@ function AddResizeListener(instance, method)
 }
 
 
-function RequestAnimationFrame(instance, method, canvas)
-{ 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
+function RequestAnimationFrame(instance, method, test)
+{     
     window.requestAnimationFrame((event) =>
     {
-        instance.invokeMethodAsync(method);
+        instance.invokeMethodAsync(method, test);
     });
 }
 
@@ -29,9 +26,10 @@ function RequestAnimationFrame(instance, method, canvas)
 //}
 
 
-function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, isMoving, instance, clickEvent, downEvent)
+function Draw(canvas, list, scale, transX, transY, rotation, px, py, test, instance, testEvent)
 {
-
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     let currentRotation = 0;
 
@@ -50,21 +48,10 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
 
 
     context.rotate(rotation);
-    currentRotation += rotation;
+    currentRotation += rotation;  // todo remove use transform
 
-    //let clickPointX=0;
-    //let clickPointY=0;
-
-    //if (isClicked)
-    //{
-    //    //clickPointX = px - offsetX / scale;  //correct in other ways
-    //    //clickPointY = py - offsetY / scale;
-    //    console.log("clicked----------------------------------");
-    //    clickPointX = px;
-    //    clickPointY = py;
-    //}
-    
-
+    let clickedItemId = "none";
+    let clickedTransform =context.getTransform();
     
     
     
@@ -72,7 +59,7 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
     list.forEach(item =>
     {
         
-        console.log(item);
+        
 
 
         switch (item.operation)
@@ -113,15 +100,11 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
                 context.arc(item.data[0], item.data[1], item.data[2], item.data[3] * Math.PI / 180, item.data[4] * Math.PI / 180, true);
                 break;
             case "testClick":                
-                if (isClicked & context.isPointInPath(px, py))
+                if (test & context.isPointInPath(px, py))
                 {
-                    instance.invokeMethodAsync(clickEvent, item.targetId);
-                }
-                else if (context.isPointInPath(px, py))
-                {
-                    instance.invokeMethodAsync(downEvent, item.targetId);
-                }
-                
+                    clickedItemId = item.targetId;
+                    clickedTransform = context.getTransform();
+                }                                
                 break;
             case "save":
                 context.save();
@@ -152,7 +135,10 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
 
     });
 
-    
+    if (test)
+    {
+        instance.invokeMethodAsync(testEvent, clickedItemId, clickedTransform);
+    }
 
 
     //createTransform(-100, -100, 1, rotation, context);
@@ -166,10 +152,7 @@ function Draw(canvas, list, scale, transX, transY, rotation, px, py, isClicked, 
     context.rect(-100, -100, 100, 100);    
     context.fillStyle = "red";
     context.fill();
-    if (isClicked & context.isPointInPath(px, py))
-    {
-        instance.invokeMethodAsync(clickEvent, item.targetId);
-    }
+    
     context.stroke();
     
 

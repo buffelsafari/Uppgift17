@@ -5,6 +5,7 @@
 @using MapViewFSM
 
 
+
 <canvas @ref="canvas" @onclick="OnClick" @onmousemove="OnMouseMove" @onmousewheel="OnMouseWheel" @onmousedown="OnMouseDown" @onmouseup="OnMouseUp" style="background-color: black; width: 100vw; height: 100vh; overflow:hidden;">
 </canvas>
 
@@ -12,7 +13,7 @@
 @code 
 {
     [CascadingParameter]
-    protected Task<IEnumerable<DrawOperation>> DrawOps { get; set; }
+    public Task<IEnumerable<DrawOperation>> DrawOps { get; set; }
 
     [Parameter]
     public Action<string> OnMachineClick { get; set; }
@@ -20,7 +21,14 @@
     [Parameter]
     public Action<string> OnMachineDown { get; set; }
 
+    [Parameter]
+    public Action<string, double, double> OnTranslateEntity { get; set; }
 
+    [Parameter]
+    public Action OnStopTranslateEntity { get; set; }
+
+
+    
 
     public double Zoom { get; set; } = 1;
 
@@ -51,7 +59,7 @@
 
     public Func<WheelEventArgs, Task> OnMouseWheel;
 
-
+    public Func<string, TransformMatrix, Task> OnMapClicked;
 
 
 
@@ -66,7 +74,7 @@
     protected async override Task OnParametersSetAsync()
     {
         //await currentState.OnParametersSetAsync();
-        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", false);
         base.OnParametersSet();
     }
 
@@ -91,13 +99,10 @@
 
 
     [JSInvokable]
-    public async Task Redraw()
+    public async Task Redraw(bool test)
     {
-        // Console.WriteLine("hello from redraw");
-
-
-
-        await JS.InvokeVoidAsync("Draw", canvas, await DrawOps, Zoom, TransX, TransY, Rotation, ClickX, ClickY, IsClicked, IsMoving, DotNetObjectReference.Create(this), "OnMapClick", "OnMapDown");
+        //Console.WriteLine("hello from redraw should test?:"+ test);
+        await JS.InvokeVoidAsync("Draw", canvas, await DrawOps, Zoom, TransX, TransY, Rotation, ClickX, ClickY, test, DotNetObjectReference.Create(this), "OnMapDown");
         IsClicked = false;
     }
 
@@ -105,25 +110,49 @@
     public async Task OnResize()
     {
         Console.WriteLine("hello resize");
-        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+        await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", false);
     }
 
-    [JSInvokable]
-    public async Task OnMapClick(string id)
-    {
-        Console.WriteLine("hello from OnMapClick:"+id);
+    //[JSInvokable]
+    //public async Task OnMapClick(string id)
+    //{
+    //    Console.WriteLine("hello from OnMapClick:"+id);
 
-        OnMachineClick.Invoke("Hello from ChildComponent id:"+id);
-        //await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
-    }
+    //    OnMachineClick.Invoke("Hello from ChildComponent id:"+id);
+
+
+
+    //    //await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+    //}
 
     [JSInvokable]
-    public async Task OnMapDown(string id)
+    public async Task OnMapDown(string id, TransformMatrix matrix)
     {
-        Console.WriteLine("hello from OnMapDown:" + id);
+
+        //Console.WriteLine("matrix -----------------------------------------------------------------"+matrix.e );
+        //Console.WriteLine("a:" + matrix.a);
+        //Console.WriteLine("b:" + matrix.b);
+        //Console.WriteLine("c:" + matrix.c);
+        //Console.WriteLine("d:" + matrix.d);
+        //Console.WriteLine("e:" + matrix.e);
+        //Console.WriteLine("f:" + matrix.f);
+        //Console.WriteLine("hello from OnMapDown:" + id);
         //isMachineGrabbed = true;
 
-        OnMachineDown.Invoke("Hello from ChildComponent id:" + id);
+        OnMapClicked?.DynamicInvoke(id, matrix);// todo rename
+
+        //OnMachineDown.Invoke("Hello from ChildComponent id:" + id);
         //await JS.InvokeVoidAsync("RequestAnimationFrame", DotNetObjectReference.Create(this), "Redraw", canvas);
+    }
+
+    public class TransformMatrix
+    {
+        public float a { get; set; }
+        public float b { get; set; }
+        public float c { get; set; }
+        public float d { get; set; }
+        public float e { get; set; }
+        public float f { get; set; }
+
     }
 }
