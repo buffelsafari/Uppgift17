@@ -27,8 +27,11 @@
     [Parameter]
     public Action OnStopTranslateEntity { get; set; }
 
+    [Parameter]
+    public Action<string, double, double> OnOpenContextMenu { get; set; }
 
-    
+
+
 
     public double Zoom { get; set; } = 1;
 

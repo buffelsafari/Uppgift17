@@ -15,6 +15,8 @@ namespace Uppgift17.MapViewFSM
         const double MAX_ZOOM = 2.0;
         const double ZOOM_SPEED = 0.0005;
 
+        private bool isContextButtonDown = false;
+
         private bool isDown=false;
         private string selectedId = "";
 
@@ -42,6 +44,7 @@ namespace Uppgift17.MapViewFSM
         protected override void EnterState(StateChangeArgs args)
         {
             isDown = false;
+            isContextButtonDown = false;
             mapView.OnMouseWheel = this.OnMouseWheel;
             mapView.OnMouseDown = this.OnMouseDown;
             mapView.OnMapClicked = this.ClickCallback;
@@ -56,6 +59,9 @@ namespace Uppgift17.MapViewFSM
             mapView.OnMapClicked = null;
             mapView.OnMouseMove = null;
             mapView.OnMouseUp = null;
+            isContextButtonDown = false;
+            isDown = false;
+            selectedId = "";
         }
 
         private async Task OnMouseMove(MouseEventArgs args)
@@ -74,13 +80,43 @@ namespace Uppgift17.MapViewFSM
                     return;
                 }
             }
+            
+            
+
+            
 
         }
 
         private async Task OnMouseUp(MouseEventArgs args)
         {
+
+            if (isContextButtonDown)
+            {
+                if (selectedId == "none")
+                {
+                    Console.WriteLine("context outside");
+                    //ChangeState(TranslateState.GetInstance(), new StateChangeArgs { X = args.OffsetX, Y = args.OffsetY });
+                    return;
+                }
+
+                if (!String.IsNullOrEmpty(selectedId))
+                {
+                    
+                    mapView.OnOpenContextMenu(selectedId, args.OffsetX, args.OffsetY);
+
+                    //ChangeState(ContextMenuState.GetInstance(), new StateChangeArgs { X = trX, Y = trY, TargetId = selectedId, Angle = angle });
+                    return;
+                }
+            }
+
+
+
+
+            isContextButtonDown = false;
             isDown = false;
             selectedId = "";
+
+            
         }
 
         private async Task OnMouseWheel(WheelEventArgs args)
@@ -128,6 +164,12 @@ namespace Uppgift17.MapViewFSM
                 return;
                 
             }
+            if (args.Buttons == 2)
+            {
+                isContextButtonDown = true;
+                Console.WriteLine("button 2 is pressed");
+            }
+
         }
 
         private async Task ClickCallback(string id, TransformMatrix matrix)

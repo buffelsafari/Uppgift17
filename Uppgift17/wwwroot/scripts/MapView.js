@@ -1,4 +1,40 @@
 ﻿
+function PositionContextMenu(contextMenu, x, y, isOpen)
+{
+    
+
+    
+    if (contextMenu.style)
+    {        
+        if ((contextMenu.offsetWidth + x+50) > window.innerWidth)
+        {
+            x -= (contextMenu.offsetWidth);            
+        }
+        if ((contextMenu.offsetHeight + y + 50) > window.innerHeight)
+        {
+            y -= (contextMenu.offsetHeight);            
+        }
+
+        contextMenu.style.left = x + "px";
+        contextMenu.style.top = y + "px";
+
+
+        if (isOpen)
+        {
+            contextMenu.style.display = "block";
+        }
+        else
+        {
+            contextMenu.style.display = "none";
+        }
+
+    }
+    
+
+
+}
+
+
 function AddResizeListener(instance, method)
 {
     window.addEventListener("resize", (event) =>
@@ -6,7 +42,12 @@ function AddResizeListener(instance, method)
         instance.invokeMethodAsync(method);
     });
 
+    window.addEventListener("contextmenu", (event) =>
+    {
+        event.preventDefault();
+    });
 }
+
 
 
 function RequestAnimationFrame(instance, method, test)
@@ -16,6 +57,7 @@ function RequestAnimationFrame(instance, method, test)
         instance.invokeMethodAsync(method, test);
     });
 }
+
 
 
 //function createTransform(originX, originY, scale, rotate, context)

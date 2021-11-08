@@ -4,10 +4,10 @@
 @inject HttpClient Http
 @inject IEntityResourceManager entityResourceManager
 
-<div style="user-select: none;">
+<div style="user-select: none;" @onclick=OnScreenClick>
 <CascadingValue Value=DrawOps>
 
-    <MapView OnStopTranslateEntity=OnStopTranslateEntity OnTranslateEntity=OnTranslateEntity OnMachineClick=OnMachineClick OnMachineDown=OnMachineDown/>
+    <MapView OnOpenContextMenu=OnOpenContextMenu OnStopTranslateEntity=OnStopTranslateEntity OnTranslateEntity=OnTranslateEntity />
 
 </CascadingValue>
 
@@ -17,73 +17,92 @@
 
 <button @onmousedown="OnAddDown" style="position:absolute; top:50px; right:200px;">add</button>
 
+<CascadingValue Value=ContextMenuArgs>
+    <ContextMenu OnNew=OnNew OnDelete=OnDelete/>
+</CascadingValue>
+
 </div>
 
 @code
 {
+    [CascadingParameter]
+    public ContextMenuArgs ContextMenuArgs { get; set; }
 
     [CascadingParameter]
     public Task<IEnumerable<DrawOperation>> DrawOps { get; set; }
 
-    protected Entity baseEntity;
+    //protected Entity baseEntity;
+
+    protected EntityHandler entityHandler;
 
 
-    void OnMachineClick(string id)
-    {
-        Console.WriteLine("hello from index "+id);
-    }
 
-    void OnMachineDown(string id)
-    {
-        Console.WriteLine("hello from index " + id);
-    }
 
     void OnTranslateEntity(string id, double x, double y)
     {
-        baseEntity.TranslateEntity(id, x, y);
+        entityHandler.TranslateEntity(id, x, y);
 
         Console.WriteLine("xxx Hello from on translate entity xxx id:"+id);
         Console.WriteLine("X=" + x + "   Y=" + y);
 
-        DrawOps = baseEntity.GetDrawOperations();
+        DrawOps = entityHandler.GetDrawOperations();
         StateHasChanged();
     }
 
     void OnStopTranslateEntity()
     {
-        baseEntity.StopTranslatingEntity();
+        entityHandler.StopTranslatingEntity();
 
         //DrawOps = baseEntity.GetDrawOperations();
         //StateHasChanged();
     }
 
+    void OnNew()
+    {
+        // todo add to right parent with parent coordinates
+        Entity machine5 = new Entity(entityResourceManager, "star_machine", 0, 0, 0);
+        entityHandler.AddChild(machine5);
+        DrawOps = entityHandler.GetDrawOperations();
+        StateHasChanged();
+        
 
-    protected async override Task OnInitializedAsync()
+        Console.WriteLine("hello from new");
+    }
+
+    void OnDelete()
+    {
+        Console.WriteLine("Hello from Delete");
+    }
+
+    void OnOpenContextMenu(string id, double x, double y)
     {
 
 
-        baseEntity = new Entity(entityResourceManager, "factory_walls", 45,100,0);
+        Console.WriteLine("opening context menu id"+id);
+        ContextMenuArgs.TargetId = id;
+        ContextMenuArgs.X = (int)x;
+        ContextMenuArgs.Y = (int)y;
+        ContextMenuArgs.IsOpen = true;
+        StateHasChanged();
+
+    }
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        entityHandler = new EntityHandler(entityResourceManager);
+
+        ContextMenuArgs = new ContextMenuArgs
+        {
+            TargetId = "",
+            X = 0,
+            Y = 0,
+            IsOpen = false
+        };
 
 
 
-        Entity child = new Entity(entityResourceManager, "factory_walls2", 0,100,100);
-        baseEntity.AddChild(child);
-
-
-        Entity machine1 = new Entity(entityResourceManager, "square_machine", 0, 600, 600);
-        baseEntity.AddChild(machine1);
-
-        Entity machine2 = new Entity(entityResourceManager, "triangle_machine", 0, -600, -600);
-        baseEntity.AddChild(machine2);
-
-        Entity machine3 = new Entity(entityResourceManager, "circle_machine", 30, 0, 0);
-        baseEntity.AddChild(machine3);
-
-        Entity machine4 = new Entity(entityResourceManager, "star_machine", 0, 200, 200);
-        baseEntity.AddChild(machine4);
-
-
-        DrawOps = baseEntity.GetDrawOperations();
+        DrawOps = entityHandler.GetDrawOperations();
 
         base.OnInitialized();
     }
@@ -91,12 +110,6 @@
 
     protected async override Task OnParametersSetAsync()
     {
-        //baseEntity.AddChild(await ServerLoader.Load(Http, entityResourceManager));
-
-        //await entityResourceManager.Load("factory_walls");
-
-        //baseEntity.LoadResources(entityResourceManager);
-
 
 
         base.OnParametersSet();
@@ -104,7 +117,7 @@
 
     private void OnClick()
     {
-        DrawOps = baseEntity.GetDrawOperations();
+        DrawOps = entityHandler.GetDrawOperations();
 
         Console.WriteLine("hello from click");
         StateHasChanged();
@@ -112,7 +125,18 @@
 
     private void OnAddDown()
     {
+        Entity machine5 = new Entity(entityResourceManager, "star_machine", 0, 0, 0);
+        entityHandler.AddChild(machine5);
+        DrawOps = entityHandler.GetDrawOperations();
+        StateHasChanged();
         Console.WriteLine("hello on adder");
+    }
+
+    private void OnScreenClick(MouseEventArgs args)
+    {
+        Console.WriteLine("clicked on screen");
+        ContextMenuArgs.IsOpen = false;
+        StateHasChanged();
     }
 
 }

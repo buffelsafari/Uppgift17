@@ -99,8 +99,11 @@ namespace Uppgift17.ViewEntity
             if (selectedId == null)
             {
                 selectedId = entity.Id;
-                selectedX = entity.x;
-                selectedY = entity.y;
+                
+
+                selectedX = entity.x-(int)x;
+                selectedY = entity.y-(int)y;                
+
             }
 
             entity.x = (int)x+selectedX;

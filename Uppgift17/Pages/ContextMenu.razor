@@ -1,0 +1,69 @@
+﻿@using Models
+@inject IJSRuntime JS
+
+<div @ref="contextMenu" class="card" style="display:none; position:absolute;left:100px;top:100px;">
+    <div class="card-header">
+        <div class="card-title">
+            @title
+        </div>
+    </div>
+    <div class="card-body m-0 p-0">
+        <ul class="list-group">            
+            <li class="list-group-item list-group-item-action list-group-item-success" @onclick=OnNew>
+                New
+            </li>
+            <li class="list-group-item list-group-item-action list-group-item-danger" @onclick=OnDelete>
+                Delete
+            </li>
+        </ul>
+        
+    </div>
+    
+</div>
+
+
+
+@code
+{
+
+    [CascadingParameter]
+    public ContextMenuArgs MenuArgs { get; set; }
+
+    [Parameter]
+    public Action OnNew { get; set; }
+
+    [Parameter]
+    public Action OnDelete { get; set; }
+
+
+    private ElementReference contextMenu;
+
+    private string title;
+
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+
+    protected async override Task OnParametersSetAsync()
+    {
+        title = $"context:{MenuArgs.TargetId}"; // todo find name via entity resource manager
+        await JS.InvokeVoidAsync("PositionContextMenu", contextMenu, MenuArgs.X, MenuArgs.Y, MenuArgs.IsOpen);
+
+        base.OnParametersSet();
+    }
+
+    //private void OnNew(MouseEventArgs args)
+    //{
+    //    Console.WriteLine("new ");
+    //}
+
+    //private void OnDelete(MouseEventArgs args)
+    //{
+    //    Console.WriteLine("delte");
+    //}
+
+
+}
